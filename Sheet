@@ -2,116 +2,50 @@ Const Name_Column As String = "C"         '姓名所在列
 Const Data_Column As String = "I"         '日期所在列
 Const StartTime_Column As String = "K"    '上班时间所在列
 Const EndTime_Column As String = "L"      '下班时间所在列
-Const TimeAdd_Column As String = "O"      '输出加班时间
-Const TimeDec_Column As String = "P"     '输出调休时间
-Const TimeOffice_Column As String = "Q"    '实际上班的时间
+Const TimeDiff_Column As String = "O"      '输出加班时间，最小单位0.5小时
+Const TimeOffice_Column As String = "P"     '输出实际上班时间
+Const TimeHuman_Column As String = "Q"    '出勤+-
 
 Sub Test()
   Dim i As Integer
   Dim TimeDiff_Date As Date
+  Dim TimeDiff_Min As Integer
+  Dim TimeActual As Single
   Dim TimeOffice As Single
-  Dim TimeAdd As Single
-  Dim TimeDec As Single
-  Dim TimeStart As Single
-  Dim TimeEnd As Single
-  Dim sTimeDecimal As Single
+  Dim sTimeOffice As Single
   Dim Name As String
   Dim LastName As String
-  For i = 1 To 20616 Step 1
-  TimeOffice = 0
-  TimeAdd = 0
-  TimeDec = 0
-  TimeStart = 0
-  TimeEnd = 0
-  sTimeDecimal = 0
+  For i = 1 To 2326 Step 1
   Name = Range(Name_Column & i).Value
   If Not (IsNull(Name)) Then
     If Range("J" & i).Value = 2 Then
-         TimeDiff_Date = Cells(i, StartTime_Column)
-         TimeStart = TimeValue(TimeDiff_Date) * 24
-         TimeDiff_Date = Cells(i, EndTime_Column)
-         TimeEnd = TimeValue(TimeDiff_Date) * 24
-         TimeDiff_Date = Cells(i, "L") - Cells(i, "K")
-         TimeOffice = TimeValue(TimeDiff_Date) * 24
-        If (TimeStart <= 8.5) And (TimeEnd >= 16.5) Then
-            sTimeDecimal = Application.RoundDown(TimeOffice, 2) - Int(TimeOffice)
-            If sTimeDecimal >= 0.5 Then
-                TimeAdd = Int(TimeOffice) - 8 + 0.5
-            Else
-                TimeAdd = Int(TimeOffice) - 8
-            End If
-            TimeDec = 0
+      TimeDiff_Date = Cells(i, "L") - Cells(i, "K")
+      TimeOffice = TimeValue(TimeDiff_Date) * 24
+      TimeDiff_Min = TimeValue(TimeDiff_Date) * 24 * 60 - 480
+      If TimeDiff_Min >= 30 Then
+        If Minute(TimeDiff_Date) >= 30 Then
+          TimeActual = Hour(TimeDiff_Date) - 8 + 0.5
         Else
-            If TimeStart > 8.5 Then
-                TimeStart = TimeStart - 8.5
-                If TimeStart > 12 Then
-                    TimeStart = TimeStart - 1
-                End If
-                sTimeDecimal = Application.RoundDown(TimeStart, 2) - Int(TimeStart)
-                If sTimeDecimal > 0.5 Then
-                    TimeStart = Int(TimeStart) + 1
-                ElseIf sTimeDecimal = 0 Then
-                    TimeStart = Int(TimeStart)
-                Else
-                    TimeStart = Int(TimeStart) + 0.5
-                End If
-                TimeDec = TimeStart
-            Else
-                TimeStart = 8.5 - TimeStart
-                sTimeDecimal = Application.RoundDown(TimeStart, 2) - Int(TimeStart)
-                If sTimeDecimal >= 0.5 Then
-                    TimeStart = Int(TimeStart) + 0.5
-                Else
-                    TimeStart = Int(TimeStart)
-                End If
-                TimeAdd = TimeStart
-            End If
-            If TimeEnd < 16.5 Then
-                TimeEnd = 16.5 - TimeEnd
-                If TimeEnd < 12 Then
-                    TimeEnd = TimeEnd - 1
-                End If
-                sTimeDecimal = Application.RoundDown(TimeEnd, 2) - Int(TimeEnd)
-                If sTimeDecimal > 0.5 Then
-                    TimeEnd = Int(TimeEnd) + 1
-                ElseIf sTimeDecimal = 0 Then
-                     TimeEnd = Int(TimeEnd)
-                Else
-                    TimeEnd = Int(TimeEnd) + 0.5
-                End If
-                TimeDec = TimeDec + TimeEnd
-            Else
-                TimeEnd = TimeEnd - 16.5
-                sTimeDecimal = Application.RoundDown(TimeEnd, 2) - Int(TimeEnd)
-                If sTimeDecimal >= 0.5 Then
-                    TimeEnd = Int(TimeEnd) + 0.5
-                Else
-                    TimeEnd = Int(TimeEnd)
-                End If
-                TimeAdd = TimeAdd + TimeEnd
-            End If
+          TimeActual = Hour(TimeDiff_Date) - 8
         End If
-        sTimeOffice = Application.RoundDown(TimeOffice, 2) - Int(TimeOffice)
-        If (Hour(Cells(i, StartTime_Column)) < 12) And (Hour(Cells(i, EndTime_Column)) > 12) Then
-            TimeOffice = TimeOffice - 1
-        End If
-        If sTimeOffice >= 0.5 Then
-            TimeOffice = Int(TimeOffice) + 0.5
-        Else
-            TimeOffice = Int(TimeOffice)
-        End If
-        TimeOffice = Application.RoundDown(TimeOffice, 1)
-        If (TimeOffice >= 7) And (TimeAdd = 0) And (TimeDec <> 0) Then
-            TimeDec = 0
-        End If
-        Range(TimeOffice_Column & i).Value = TimeOffice
-        Range(TimeAdd_Column & i).Value = TimeAdd
-        Range(TimeDec_Column & i).Value = TimeDec
+        Range(TimeDiff_Column & i).Value = TimeActual
+      End If
+      sTimeOffice = Application.RoundDown(TimeOffice, 1) - Int(TimeOffice)
+      If (Hour(Cells(i, StartTime_Column)) < 12) And (Hour(Cells(i, EndTime_Column)) > 12) Then
+        TimeOffice = TimeOffice - 1
+      End If
+      If sTimeOffice >= 0.5 Then
+        TimeOffice = Int(TimeOffice) + 0.5
+      Else
+        TimeOffice = Int(TimeOffice)
+      End If
+      TimeOffice = Application.RoundDown(TimeOffice, 1)
+      Range(TimeOffice_Column & i).Value = TimeOffice
+      Range(TimeHuman_Column & i).Value = TimeOffice - 7
     End If 'end of If Range("J" & i).Value = 2 Then
   End If    'end of If Not (IsNull(Name)) Then
   Next i
 End Sub
-
 
 
 
