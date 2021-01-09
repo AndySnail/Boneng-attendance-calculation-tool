@@ -4,44 +4,45 @@ Const StartTime_Column As String = "K"    '上班时间所在列
 Const EndTime_Column As String = "L"      '下班时间所在列
 Const TimeDiff_Column As String = "O"      '输出加班时间，最小单位0.5小时
 Const TimeOffice_Column As String = "P"     '输出实际上班时间
-Const TimeHuman_Column As String = "Q"    '出勤+-
 
 Sub Test()
   Dim i As Integer
   Dim TimeDiff_Date As Date
-  Dim TimeDiff_Min As Integer
+  Dim TimeDiff_Hour As Single
   Dim TimeActual As Single
   Dim TimeOffice As Single
-  Dim sTimeOffice As Single
+  Dim Test As Integer
   Dim Name As String
   Dim LastName As String
   For i = 1 To 2326 Step 1
   Name = Range(Name_Column & i).Value
   If Not (IsNull(Name)) Then
     If Range("J" & i).Value = 2 Then
-      TimeDiff_Date = Cells(i, "L") - Cells(i, "K")
-      TimeOffice = TimeValue(TimeDiff_Date) * 24
-      TimeDiff_Min = TimeValue(TimeDiff_Date) * 24 * 60 - 480
-      If TimeDiff_Min >= 30 Then
-        If Minute(TimeDiff_Date) >= 30 Then
-          TimeActual = Hour(TimeDiff_Date) - 8 + 0.5
-        Else
-          TimeActual = Hour(TimeDiff_Date) - 8
-        End If
-        Range(TimeDiff_Column & i).Value = TimeActual
+     Test = Hour(Cells(i, StartTime_Column))
+      If Hour(Cells(i, StartTime_Column)) = 12 Then     '上班时间12：00-13：00
+        TimeDiff_Date = Cells(i, EndTime_Column)
+        TimeOffice = TimeValue(TimeDiff_Date) * 24 - 13
+      ElseIf Hour(Cells(i, EndTime_Column)) = 12 Then   '下班时间12：00-13：00
+        TimeDiff_Date = Cells(i, StartTime_Column)
+        TimeOffice = 12 - TimeValue(TimeDiff_Date) * 24
+      ElseIf Hour(Cells(i, StartTime_Column)) > 12 Or Hour(Cells(i, EndTime_Column)) < 12 Then      '上半天班
+        TimeDiff_Date = Cells(i, EndTime_Column) - Cells(i, StartTime_Column)
+        TimeOffice = TimeValue(TimeDiff_Date) * 24
+      Else             '正常上班
+        TimeDiff_Date = Cells(i, EndTime_Column) - Cells(i, StartTime_Column)
+        TimeOffice = TimeValue(TimeDiff_Date) * 24 - 1
       End If
-      sTimeOffice = Application.RoundDown(TimeOffice, 1) - Int(TimeOffice)
-      If (Hour(Cells(i, StartTime_Column)) < 12) And (Hour(Cells(i, EndTime_Column)) > 12) Then
-        TimeOffice = TimeOffice - 1
-      End If
-      If sTimeOffice >= 0.5 Then
-        TimeOffice = Int(TimeOffice) + 0.5
+      TimeOffice = Application.RoundDown(TimeOffice, 2)
+      TimeDiff_Hour = TimeOffice - Int(TimeOffice)
+      If TimeDiff_Hour >= 0.5 Then
+          TimeOffice = Int(TimeOffice) + 0.5
       Else
-        TimeOffice = Int(TimeOffice)
+          TimeOffice = Int(TimeOffice)
       End If
+      TimeActual = TimeOffice - 7
+      Range(TimeDiff_Column & i).Value = TimeActual
       TimeOffice = Application.RoundDown(TimeOffice, 1)
       Range(TimeOffice_Column & i).Value = TimeOffice
-      Range(TimeHuman_Column & i).Value = TimeOffice - 7
     End If 'end of If Range("J" & i).Value = 2 Then
   End If    'end of If Not (IsNull(Name)) Then
   Next i
