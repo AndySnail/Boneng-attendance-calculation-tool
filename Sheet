@@ -1,0 +1,54 @@
+Const Name_Column As String = "C"         '姓名所在列
+Const Data_Column As String = "I"         '日期所在列
+Const StartTime_Column As String = "K"    '上班时间所在列
+Const EndTime_Column As String = "L"      '下班时间所在列
+Const TimeDec_Column As String = "O"      '输出上下班时间详细描述所在列
+Const TimeDiff_Column As String = "P"     '输出加班时间，最小单位0.5小时
+Sub Test()
+  Dim i As Integer
+  Dim TimeDiff_Date As Date
+  Dim TimeDiff_Min As Integer
+  Dim TimeActual As Single
+  Dim TimeCount As Single
+  Dim Output As String
+  Dim Name As String
+  Dim LastName As String
+  For i = 1 To 20670 Step 1
+  Name = Range(Name_Column & i).Value
+  If Not (IsNull(Name)) Then
+    If Range("J" & i).Value = 2 Then
+      TimeDiff_Date = Cells(i, "L") - Cells(i, "K")
+      TimeDiff_Min = TimeValue(TimeDiff_Date) * 24 * 60 - 480
+      If TimeDiff_Min >= 30 Then
+        Output = Day(Cells(i, Data_Column)) & "日" & Hour(Cells(i, StartTime_Column)) & "时" & Minute(Cells(i, StartTime_Column)) & "分" & "至" & Hour(Cells(i, EndTime_Column)) & "时" & Minute(Cells(i, EndTime_Column)) & "分"
+        Range(TimeDec_Column & i).Value = Output
+        If Minute(TimeDiff_Date) >= 30 Then
+          TimeActual = Hour(TimeDiff_Date) - 8 + 0.5
+        Else
+          TimeActual = Hour(TimeDiff_Date) - 8
+        End If
+        Range(TimeDiff_Column & i).Value = TimeActual
+        If (Name = LastName) Or (LastName = "") Then
+           TimeCount = TimeCount + TimeActual
+        Else
+          Range("Q" & (i - 2)).Value = TimeCount
+          TimeCount = 0
+        End If
+        LastName = Name
+      End If
+    End If
+  End If
+  Next i
+End Sub
+
+
+
+
+
+
+
+
+
+
+
+
