@@ -11,14 +11,11 @@ Sub Test()
   Dim TimeDiff_Hour As Single
   Dim TimeActual As Single
   Dim TimeOffice As Single
-  Dim Test As Integer
   Dim Name As String
-  Dim LastName As String
   For i = 1 To 2326 Step 1
   Name = Range(Name_Column & i).Value
   If Not (IsNull(Name)) Then
     If Range("J" & i).Value = 2 Then
-     Test = Hour(Cells(i, StartTime_Column))
       If Hour(Cells(i, StartTime_Column)) = 12 Then     '上班时间12：00-13：00
         TimeDiff_Date = Cells(i, EndTime_Column)
         TimeOffice = TimeValue(TimeDiff_Date) * 24 - 13
@@ -32,7 +29,6 @@ Sub Test()
         TimeDiff_Date = Cells(i, EndTime_Column) - Cells(i, StartTime_Column)
         TimeOffice = TimeValue(TimeDiff_Date) * 24 - 1
       End If
-      TimeOffice = Application.RoundDown(TimeOffice, 2)
       TimeDiff_Hour = TimeOffice - Int(TimeOffice)
       If TimeDiff_Hour >= 0.5 Then
           TimeOffice = Int(TimeOffice) + 0.5
