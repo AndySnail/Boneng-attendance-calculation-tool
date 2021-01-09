@@ -9,9 +9,6 @@ Const TimeOffice_Column As String = "Q"    '实际上班的时间
 Sub Test()
   Dim i As Integer
   Dim TimeDiff_Date As Date
-  Dim TimeDiff_Min As Integer
-  Dim TimeActual As Single
-  Dim TimeCount As Single
   Dim TimeOffice As Single
   Dim TimeAdd As Single
   Dim TimeDec As Single
@@ -20,7 +17,13 @@ Sub Test()
   Dim sTimeDecimal As Single
   Dim Name As String
   Dim LastName As String
-  For i = 1 To 1022 Step 1
+  For i = 1 To 20616 Step 1
+  TimeOffice = 0
+  TimeAdd = 0
+  TimeDec = 0
+  TimeStart = 0
+  TimeEnd = 0
+  sTimeDecimal = 0
   Name = Range(Name_Column & i).Value
   If Not (IsNull(Name)) Then
     If Range("J" & i).Value = 2 Then
@@ -98,6 +101,9 @@ Sub Test()
             TimeOffice = Int(TimeOffice)
         End If
         TimeOffice = Application.RoundDown(TimeOffice, 1)
+        If (TimeOffice >= 7) And (TimeAdd = 0) And (TimeDec <> 0) Then
+            TimeDec = 0
+        End If
         Range(TimeOffice_Column & i).Value = TimeOffice
         Range(TimeAdd_Column & i).Value = TimeAdd
         Range(TimeDec_Column & i).Value = TimeDec
@@ -105,6 +111,8 @@ Sub Test()
   End If    'end of If Not (IsNull(Name)) Then
   Next i
 End Sub
+
+
 
 
 
